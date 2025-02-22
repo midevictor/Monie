@@ -117,7 +117,7 @@ async function analyzeTransactions() {
 
 
   const highestHour = hourlyTransactionCounts.indexOf(Math.max(...hourlyTransactionCounts))
-
+//returned values anytime the api is fetched
   return {
     highestSalesVolumeDay,
     highestSalesVolume,
