@@ -1,40 +1,53 @@
 "use client"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+  
+interface AnalysisResults {
+  highestSalesVolumeDay: string;
+  highestSalesVolume: number;
+  highestSalesValueDay: string;
+  highestSalesValue: number;
+  mostSoldProductId: string;
+  mostSoldProductVolume: number;
+  highestSalesStaffByMonth: { [month: string]: string };
+  highestHour: number;
+  highestHourAvgVolume: number;
+}
 
 const Analytics = () => {
-  interface AnalysisResults {
-    highestSalesVolumeDay: string;
-    highestSalesVolume: number;
-    highestSalesValueDay: string;
-    highestSalesValue: number;
-    mostSoldProductId: string;
-    mostSoldProductVolume: number;
-    highestSalesStaffByMonth: { [month: string]: string };
-    highestHour: number;
-    highestHourAvgVolume: number;
-  }
-  
-  const [results, setResults] = useState<AnalysisResults | null>(null)
+   const [results, setResults] = useState<AnalysisResults | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const runAnalysis = async () => {
-    // This function will be called when the button is clicked
-    // It will send a request to our server to run the analysis
+    setIsLoading(true)
+    setError(null)
     try {
-      const response = await fetch("/api/analyze", { method: "POST" })
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      })
+      if (!response.ok) {
+        throw new Error("Analysis failed")
+      }
       const data = await response.json()
       setResults(data)
     } catch (error) {
       console.error("Error running analysis:", error)
+      setError("An error occurred while running the analysis. Please try again.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
   return (
     <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Monieshop Analytics</h1>
-      <Button onClick={runAnalysis}>Run Analysis</Button>
+      <h1 className="text-2xl font-bold mb-4">Moniepoint Analytics</h1>
+      <Button onClick={runAnalysis} disabled={isLoading}>
+        {isLoading ? "hold my beer" : "Run Analysis"}
+      </Button>
+      {error && <p className="text-red-500 mt-4">{error}</p>}
       {results && (
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
           <Card>
@@ -94,4 +107,6 @@ const Analytics = () => {
 }
 
 export default Analytics
+
+
 
