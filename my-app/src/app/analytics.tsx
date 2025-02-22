@@ -3,6 +3,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
   
+
+
 interface AnalysisResults {
   highestSalesVolumeDay: string;
   highestSalesVolume: number;
@@ -34,8 +36,8 @@ const Analytics = () => {
       const data = await response.json()
       setResults(data)
     } catch (error) {
-      console.error("Error running analysis:", error)
-      setError("An error occurred while running the analysis. Please try again.")
+        console.error("Error running analysis:", error)
+        setError(`An error occurred while running the analysis: ${(error as Error).message}`)
     } finally {
       setIsLoading(false)
     }

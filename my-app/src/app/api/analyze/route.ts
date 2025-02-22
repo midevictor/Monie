@@ -2,8 +2,6 @@ import { NextResponse } from "next/server"
 import fs from "fs"
 import path from "path"
 
-
-
 //what i did here was an async function that "post" all data from the transactions and then it will return the results of the analysis
 export async function POST() {
   try {
@@ -15,10 +13,29 @@ export async function POST() {
   }
 }
 
+//asyn function
 async function analyzeTransactions() {
-  const dataDir = path.join(process.cwd(), "data")
-  const files = fs.readdirSync(dataDir)
+  // const dataDir = path.join(process.cwd(), "data")
+  const dataDir = path.join(process.cwd(),  "data", "transactions");
+  const files = fs.readdirSync(dataDir);
+  console.log(files);
 
+  // const dataDir = path.join(process.cwd(), "..", "data", "transactions")
+  // const dataDir = path.join(process.cwd(), "data", "transactions");
+  // console.log("Data directory:", dataDir)
+
+  // if (!fs.existsSync(dataDir)) {
+  //   throw new Error(`Directory does not exist: ${dataDir}`)
+  // }
+
+  // const files = fs.readdirSync(dataDir)
+  // console.log("Files found:", files)
+
+  // if (files.length === 0) {
+  //   throw new Error("No files found in the transactions directory")
+  // }
+  
+  //initialized all avraiables
   let highestSalesVolume = 0
   let highestSalesVolumeDay = ""
   let highestSalesValue = 0
@@ -40,19 +57,26 @@ async function analyzeTransactions() {
       for (const line of lines) {
         if (line.trim() === "") continue
 
+        //destructure the line for each looop
         const [staffId, timestamp, products, saleAmount] = line.split(",")
+        //split date also by T to get the date
         const date = timestamp.split("T")[0]
+        // split date vand get the secobnd value bin the array, split that too and get the first value to get the hr
         const hour = Number.parseInt(timestamp.split("T")[1].split(":")[0])
+        //parse the sale amount to float
         const saleValue = Number.parseFloat(saleAmount)
 
         // Update daily sales
         dailySalesVolume += 1
         dailySalesValue += saleValue
 
-        // Update product sales
+        // Update product sales, gwt product list by removing the brackets and splitting by |
         const productList = products.slice(1, -1).split("|")
+        //loop thru it
         for (const product of productList) {
+          //destructure the product split to get the product id and quantity
           const [productId, quantity] = product.split(":")
+          //update the product sales by adding the quantity to the product id
           productSales[productId] = (productSales[productId] || 0) + Number.parseInt(quantity)
         }
 
@@ -91,9 +115,8 @@ async function analyzeTransactions() {
     )
   }
 
-  // Calculate highest hour by average transaction volume
-  const avgHourlyTransactions = hourlyTransactions.map((total, index) => total / hourlyTransactionCounts[index])
-  const highestHour = avgHourlyTransactions.indexOf(Math.max(...avgHourlyTransactions))
+
+  const highestHour = hourlyTransactionCounts.indexOf(Math.max(...hourlyTransactionCounts))
 
   return {
     highestSalesVolumeDay,
@@ -104,7 +127,7 @@ async function analyzeTransactions() {
     mostSoldProductVolume: productSales[mostSoldProductId],
     highestSalesStaffByMonth,
     highestHour,
-    highestHourAvgVolume: avgHourlyTransactions[highestHour],
+    highestHourAvgVolume: hourlyTransactionCounts[highestHour],
   }
 }
 
